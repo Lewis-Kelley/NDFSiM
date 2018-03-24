@@ -1,0 +1,20 @@
+* NDFSiM
+Non-Deterministic Finite State Machine Simulator.
+* Usage
+#+BEGIN_SRC bash
+  ghc Main.hs
+
+  ./Main aab*.fsm aaba
+  ./Main aab*.fsm aababa
+#+END_SRC
+* File Format Specification
+See [[aab*a.fsm]] for an example configuration.
+
+#+BEGIN_QUOTE
+<space separated characters in the alphabet>
+<name of the start state>
+<space separated names of accepting states>
+<<name of origin state> <transition character> <name of destination state>>*
+#+END_QUOTE
+
+An omitted transition is presumed to be the dead state.
