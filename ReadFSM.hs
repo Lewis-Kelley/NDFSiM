@@ -54,7 +54,7 @@ createFSM startName acceptingNames transitions alphabet =
     stateMap = interpretTransitions initialStateMap transitions
   in
     (M.findWithDefault (State (Txt.pack "start") M.empty False) startName stateMap,
-      M.elems stateMap, alphabet)
+      stateMap, alphabet)
 
 makeAcceptingStateEntry :: Name -> (Name, State)
 makeAcceptingStateEntry name =

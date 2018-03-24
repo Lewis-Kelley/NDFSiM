@@ -9,7 +9,7 @@ data State = State Name (M.Map Symbol [Name]) Bool
 
 type Name = Text
 
-type FSM = (State, [State], Alphabet)
+type FSM = (State, M.Map Name State, Alphabet)
 
 type Symbol = Text
 type Alphabet = S.Set Symbol
