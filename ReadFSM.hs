@@ -4,10 +4,10 @@ import FSM
 
 import qualified Data.Text as Txt
 import qualified Data.Text.IO as Tio
-import Data.Map.Strict as M
+import Data.Map.Strict as M hiding (toList)
 import Data.Set as S
 
-type Transition = (Name, Symbol, Name)
+type Transition = (State, Symbol, State)
 
 loadFSM :: String -> IO FSM
 loadFSM filename = do
@@ -19,25 +19,31 @@ parseContents contents =
   let
     (alphabetLine : startLine : acceptingLine : transitionLines) = Txt.lines contents
     alphabet = getAlphabet alphabetLine
-    startName = getStartName startLine
-    acceptingNames = getAcceptingNames acceptingLine
+    start = getStart startLine
+    accepting = getAccepting acceptingLine
     transitions = readTransitions transitionLines
+    states = getStates transitions
   in
-    createFSM startName acceptingNames transitions alphabet
+    (states, alphabet, transitions, start, accepting)
 
 getAlphabet :: Txt.Text -> Alphabet
 getAlphabet = S.fromList . Txt.words
 
-getStartName :: Txt.Text -> Name
-getStartName = id
+getStart :: Txt.Text -> State
+getStart = id
 
-getAcceptingNames :: Txt.Text -> [Name]
-getAcceptingNames = Txt.words
+getAccepting :: Txt.Text -> [State]
+getAccepting = Txt.words
 
-readTransitions :: [Txt.Text] -> [Transition]
-readTransitions [] = []
+readTransitions :: [Txt.Text] -> Map (State, Symbol) [State]
+readTransitions [] = M.empty
 readTransitions (first : rest) =
-  (getTransition first : readTransitions rest)
+  let
+    transitions = readTransitions rest
+    (start, symbol, end) = getTransition first
+    children = M.findWithDefault [] (start, symbol) transitions
+  in
+    M.insert (start, symbol) (end : children) transitions
 
 getTransition :: Txt.Text -> Transition
 getTransition line =
@@ -46,37 +52,5 @@ getTransition line =
  in
    (start, symbol, end)
 
-createFSM :: Name -> [Name] -> [Transition] -> Alphabet -> FSM
-createFSM startName acceptingNames transitions alphabet =
-  let
-    initialStateMap = M.fromList $ Prelude.map makeAcceptingStateEntry
-                      acceptingNames
-    stateMap = interpretTransitions initialStateMap transitions
-  in
-    (M.findWithDefault (State (Txt.pack "start") M.empty False) startName stateMap,
-      stateMap, alphabet)
-
-makeAcceptingStateEntry :: Name -> (Name, State)
-makeAcceptingStateEntry name =
-  (name, State name M.empty True)
-
-interpretTransitions :: (Map Name State) -> [Transition] -> (Map Name State)
-interpretTransitions stateMap [] = stateMap
-interpretTransitions stateMap ((origin, symbol, destination) : transitions) =
-  let
-    initialOriginState =
-      findWithDefault (State origin M.empty False) origin stateMap
-    originState =
-      addTransitionToState (symbol, destination) initialOriginState
-  in
-    interpretTransitions (M.insert origin originState stateMap) transitions
-
-addTransitionToState :: (Symbol, Name) -> State -> State
-addTransitionToState (symbol, destination) (State name transitionMap accepting) =
-  let
-    destinations =
-      (destination : findWithDefault [] symbol transitionMap)
-    newTransitionMap =
-      M.insert symbol destinations transitionMap
-  in
-    (State name newTransitionMap accepting)
+getStates :: Map (State, Symbol) [State] -> [State]
+getStates = toList . S.map fst . keysSet

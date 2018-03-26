@@ -1,19 +1,16 @@
 module RunFSM where
 
-import Data.Map.Strict as M (findWithDefault, lookup)
-import Data.Maybe
+import Data.Map.Strict as M (findWithDefault)
 import FSM
 
 runFSM :: FSM -> [Symbol] -> Bool
-runFSM fsm@(start, _, _) string =
+runFSM fsm@(_, _, _, start, _) string =
   runStep fsm string start
 
 runStep :: FSM -> [Symbol] -> State -> Bool
-runStep _ [] (State _ _ accepting) = accepting
-runStep fsm@(_, stateMap, _) (next : rest) (State _ transitions _) =
+runStep (_, _, _, _, accepting) [] state = elem state accepting
+runStep fsm@(_, _, stateMap, _, _) (next : rest) state =
   let
-    nextNames = M.findWithDefault [] next transitions
-    nextStages = map (\ name -> M.lookup name stateMap) nextNames
-    results = map (runStep fsm rest) $ catMaybes nextStages
+    children = findWithDefault [] (state, next) stateMap
   in
-    foldr (||) False results
+    any (\ child -> runStep fsm rest child) children
