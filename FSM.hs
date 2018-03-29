@@ -5,7 +5,9 @@ import qualified Data.Set as S
 import Data.Text (Text)
 
 type State = Text
-type Symbol = Text
+data Symbol = Sym Text | Epsilon
+  deriving (Eq, Ord)
+
 type Alphabet = S.Set Symbol
 
 type FSM = ([State], Alphabet, M.Map (State, Symbol) [State], State, [State])

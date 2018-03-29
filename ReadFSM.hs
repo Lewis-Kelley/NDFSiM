@@ -2,8 +2,8 @@ module ReadFSM where
 
 import FSM
 
-import qualified Data.Text as Txt
-import qualified Data.Text.IO as Tio
+import Data.Text as Txt
+import Data.Text.IO as Tio
 import Data.Map.Strict as M hiding (toList)
 import Data.Set as S
 
@@ -27,7 +27,7 @@ parseContents contents =
     (states, alphabet, transitions, start, accepting)
 
 getAlphabet :: Txt.Text -> Alphabet
-getAlphabet = S.fromList . Txt.words
+getAlphabet = S.map (\ char -> Sym char) . S.fromList . Txt.words
 
 getStart :: Txt.Text -> State
 getStart = id
@@ -50,7 +50,11 @@ getTransition line =
  let
    [start, symbol, end] = Txt.words line
  in
-   (start, symbol, end)
+   if symbol == Txt.pack "_"
+   then
+     (start, Epsilon, end)
+   else
+     (start, Sym symbol, end)
 
 getStates :: Map (State, Symbol) [State] -> [State]
 getStates = toList . S.map fst . keysSet

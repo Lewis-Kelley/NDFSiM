@@ -1,6 +1,7 @@
 import Data.Text hiding (map)
 import System.Environment
 
+import FSM
 import ReadFSM
 import RunFSM
 
@@ -17,7 +18,7 @@ parseArgs (filename : string : _) = runOnString filename string
 runOnString :: String -> String -> IO()
 runOnString filename string = do
   fsm <- loadFSM filename
-  print $ runFSM fsm $ map (\ char -> pack [char]) string
+  print $ runFSM fsm $ map (\ char -> Sym $ pack [char]) string
 
 printUsage :: IO()
 printUsage =
