@@ -8,7 +8,7 @@ Non-Deterministic Finite State Machine Simulator.
   ./Main aab*.fsm aababa
 #+END_SRC
 * File Format Specification
-See [[aab*a.fsm]] for an example configuration.
+See [[aab*a.fsm]] and [[epsTest.fsm]] for example configurations.
 
 #+BEGIN_QUOTE
 <space separated characters in the alphabet>
@@ -17,4 +17,5 @@ See [[aab*a.fsm]] for an example configuration.
 <<name of origin state> <transition character> <name of destination state>>*
 #+END_QUOTE
 
-An omitted transition is presumed to be the dead state.
+An omitted transition is presumed to be the dead state. A transition
+over the symbol '_' is considered an epsilon transition.
