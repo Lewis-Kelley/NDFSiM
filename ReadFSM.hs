@@ -32,18 +32,18 @@ getAlphabet = S.map (\ char -> Sym char) . S.fromList . Txt.words
 getStart :: Txt.Text -> State
 getStart = id
 
-getAccepting :: Txt.Text -> [State]
-getAccepting = Txt.words
+getAccepting :: Txt.Text -> Set State
+getAccepting = S.fromList . Txt.words
 
-readTransitions :: [Txt.Text] -> Map (State, Symbol) [State]
+readTransitions :: [Txt.Text] -> TransitionMap
 readTransitions [] = M.empty
 readTransitions (first : rest) =
   let
     transitions = readTransitions rest
     (start, symbol, end) = getTransition first
-    children = M.findWithDefault [] (start, symbol) transitions
+    children = M.findWithDefault S.empty (start, symbol) transitions
   in
-    M.insert (start, symbol) (end : children) transitions
+    M.insert (start, symbol) (S.insert end children) transitions
 
 getTransition :: Txt.Text -> Transition
 getTransition line =
@@ -56,5 +56,5 @@ getTransition line =
    else
      (start, Sym symbol, end)
 
-getStates :: Map (State, Symbol) [State] -> [State]
-getStates = toList . S.map fst . keysSet
+getStates :: TransitionMap -> Set State
+getStates = S.map fst . keysSet
