@@ -2,8 +2,10 @@ module FSMUnion where
 
 import Data.Text (Text, cons, pack)
 import Data.Set as S (Set, union, map, insert, fromList)
-import Data.Map.Strict as M (union, insert, empty, foldrWithKey)
+import Data.Map.Strict as M (union, insert)
+
 import FSM
+import FSMConstruction
 
 unionFSMs :: FSM -> FSM -> FSM
 unionFSMs (leftStates, leftAlphabet, leftTransitions, leftStart, leftAccepting)
@@ -48,11 +50,6 @@ unionTransitions markLeft markRight leftStartState rightStartState
                                                     (markRight rightStartState)]) mergedTransitions
   in
     fullTransitions
-
-markTransitions :: TransitionMap -> (Text -> Text) -> TransitionMap
-markTransitions transitions mark =
-  foldrWithKey (\ (start, sym) end rest ->
-                  M.insert (mark start, sym) (S.map mark end) rest) M.empty transitions
 
 unionAcceptingStates :: (Text -> Text) -> (Text -> Text) -> Set State -> Set State -> Set State
 unionAcceptingStates markLeft markRight leftAccepting rightAccepting =

@@ -6,6 +6,7 @@ import Data.Text (pack)
 
 import FSM hiding (Sym)
 import Regex
+import FSMConcat
 import FSMUnion
 
 regexToFSM :: Regex -> FSM
@@ -34,3 +35,9 @@ regexToFSM (Union leftRegex rightRegex) =
     rightFSM = regexToFSM rightRegex
   in
     unionFSMs leftFSM rightFSM
+regexToFSM (Concat leftRegex rightRegex) =
+  let
+    leftFSM = regexToFSM leftRegex
+    rightFSM = regexToFSM rightRegex
+  in
+    concatFSMs leftFSM rightFSM
