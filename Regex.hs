@@ -3,7 +3,6 @@ module Regex where
 import FSM (Symbol(Epsilon, Sym))
 
 data Regex = Sym Symbol
-           | Parens Regex
            | Union Regex Regex
            | Star Regex
            | Plus Regex
@@ -32,13 +31,13 @@ parseRegex ('(' : afterOpen) = do
   case afterParen of
     ('*' : rest) -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Star (Parens innerRegex)) tailRegex
+      Just $ Concat (Star innerRegex) tailRegex
     ('+' : rest) -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Plus (Parens innerRegex)) tailRegex
+      Just $ Concat (Plus innerRegex) tailRegex
     rest -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Parens innerRegex) tailRegex
+      Just $ Concat innerRegex tailRegex
 parseRegex [firstChar] =
   Just $ makeRegSym firstChar
 parseRegex (firstChar : '*' : rest) = do
