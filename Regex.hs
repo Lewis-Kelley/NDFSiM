@@ -5,7 +5,6 @@ import FSM (Symbol(Epsilon, Sym))
 data Regex = Sym Symbol
            | Union Regex Regex
            | Star Regex
-           | Plus Regex
            | Concat Regex Regex
   deriving (Eq, Ord, Show)
 
@@ -34,7 +33,7 @@ parseRegex ('(' : afterOpen) = do
       Just $ Concat (Star innerRegex) tailRegex
     ('+' : rest) -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Plus innerRegex) tailRegex
+      Just $ Concat (Concat innerRegex (Star innerRegex)) tailRegex
     rest -> do
       tailRegex <- parseRegex rest
       Just $ Concat innerRegex tailRegex
@@ -45,7 +44,8 @@ parseRegex (firstChar : '*' : rest) = do
   Just $ Concat (Star $ makeRegSym firstChar) tailRegex
 parseRegex (firstChar : '+' : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Plus $ makeRegSym firstChar) tailRegex
+  Just $ Concat (Concat (makeRegSym firstChar)
+                  (Star (makeRegSym firstChar))) tailRegex
 parseRegex (firstChar : rest) = do
   tailRegex <- parseRegex rest
   Just $ Concat (makeRegSym firstChar) tailRegex
