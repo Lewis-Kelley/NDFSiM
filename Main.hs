@@ -1,4 +1,3 @@
-import Data.Text hiding (map)
 import System.Environment
 
 import FSM
@@ -12,13 +11,17 @@ main = do
 
 parseArgs :: [String] -> IO()
 parseArgs [] = printUsage
-parseArgs [filename] = runOnString filename ""
-parseArgs (filename : string : _) = runOnString filename string
+parseArgs [filename] = runFSMOnString filename ""
+parseArgs (filename : string : _) = runFSMOnString filename string
 
-runOnString :: String -> String -> IO()
-runOnString filename string = do
+runFSMOnString :: String -> String -> IO()
+runFSMOnString filename string = do
   fsm <- loadFSM filename
-  print $ runFSM fsm $ map (\ char -> Sym $ pack [char]) string
+  case fsm of
+    Nothing ->
+      print ("Invalid FSM specified in " ++ filename)
+    Just actFSM ->
+      print $ runFSM actFSM $ map Sym string
 
 printUsage :: IO()
 printUsage =

@@ -1,8 +1,6 @@
 module Regex where
 
 import FSM (Symbol(Epsilon, Sym))
-import Data.List
-import Data.Text as T (singleton)
 
 data Regex = Sym Symbol
            | Parens Regex
@@ -42,16 +40,20 @@ parseRegex ('(' : afterOpen) = do
       tailRegex <- parseRegex rest
       Just $ Concat (Parens innerRegex) tailRegex
 parseRegex [firstChar] =
-  Just $ Regex.Sym $ FSM.Sym $ singleton firstChar
+  Just $ makeRegSym firstChar
 parseRegex (firstChar : '*' : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Star $ Regex.Sym $ FSM.Sym $ singleton firstChar) tailRegex
+  Just $ Concat (Star $ makeRegSym firstChar) tailRegex
 parseRegex (firstChar : '+' : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Plus $ Regex.Sym $ FSM.Sym $ singleton firstChar) tailRegex
+  Just $ Concat (Plus $ makeRegSym firstChar) tailRegex
 parseRegex (firstChar : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Regex.Sym $ FSM.Sym $ singleton firstChar) tailRegex
+  Just $ Concat (makeRegSym firstChar) tailRegex
+
+makeRegSym :: Char -> Regex
+makeRegSym '_' = Regex.Sym $ Epsilon
+makeRegSym char = Regex.Sym $ FSM.Sym char
 
 splitAtUnion :: String -> Maybe (String, String)
 splitAtUnion "" = Just ("", "")
