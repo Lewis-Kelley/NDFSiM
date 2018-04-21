@@ -6,8 +6,10 @@ import Data.Text (pack)
 
 import FSM hiding (Sym)
 import Regex
+import FSMConstruction
 import FSMConcat
 import FSMUnion
+import FSMStar
 
 regexToFSM :: Regex -> FSM
 regexToFSM (Sym Epsilon) =
@@ -41,3 +43,8 @@ regexToFSM (Concat leftRegex rightRegex) =
     rightFSM = regexToFSM rightRegex
   in
     concatFSMs leftFSM rightFSM
+regexToFSM (Star regex) =
+  let
+    fsm = regexToFSM regex
+  in
+    starFSM fsm

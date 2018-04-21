@@ -1,6 +1,6 @@
 module FSMUnion where
 
-import Data.Text (Text, cons, pack)
+import Data.Text (Text, cons)
 import Data.Set as S (Set, union, map, insert, fromList)
 import Data.Map.Strict as M (union, insert)
 
@@ -54,6 +54,3 @@ unionTransitions markLeft markRight leftStartState rightStartState
 unionAcceptingStates :: (Text -> Text) -> (Text -> Text) -> Set State -> Set State -> Set State
 unionAcceptingStates markLeft markRight leftAccepting rightAccepting =
   S.union (S.map markLeft leftAccepting) (S.map markRight rightAccepting)
-
-makeStartState :: State
-makeStartState = pack "0"
