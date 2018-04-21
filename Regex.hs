@@ -1,14 +1,10 @@
 module Regex where
 
 import FSM (Symbol(Epsilon, Sym))
-import Data.List
-import Data.Text as T (singleton)
 
 data Regex = Sym Symbol
-           | Parens Regex
            | Union Regex Regex
            | Star Regex
-           | Plus Regex
            | Concat Regex Regex
   deriving (Eq, Ord, Show)
 
@@ -34,24 +30,29 @@ parseRegex ('(' : afterOpen) = do
   case afterParen of
     ('*' : rest) -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Star (Parens innerRegex)) tailRegex
+      Just $ Concat (Star innerRegex) tailRegex
     ('+' : rest) -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Plus (Parens innerRegex)) tailRegex
+      Just $ Concat (Concat innerRegex (Star innerRegex)) tailRegex
     rest -> do
       tailRegex <- parseRegex rest
-      Just $ Concat (Parens innerRegex) tailRegex
+      Just $ Concat innerRegex tailRegex
 parseRegex [firstChar] =
-  Just $ Regex.Sym $ FSM.Sym $ singleton firstChar
+  Just $ makeRegSym firstChar
 parseRegex (firstChar : '*' : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Star $ Regex.Sym $ FSM.Sym $ singleton firstChar) tailRegex
+  Just $ Concat (Star $ makeRegSym firstChar) tailRegex
 parseRegex (firstChar : '+' : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Plus $ Regex.Sym $ FSM.Sym $ singleton firstChar) tailRegex
+  Just $ Concat (Concat (makeRegSym firstChar)
+                  (Star (makeRegSym firstChar))) tailRegex
 parseRegex (firstChar : rest) = do
   tailRegex <- parseRegex rest
-  Just $ Concat (Regex.Sym $ FSM.Sym $ singleton firstChar) tailRegex
+  Just $ Concat (makeRegSym firstChar) tailRegex
+
+makeRegSym :: Char -> Regex
+makeRegSym '_' = Regex.Sym $ Epsilon
+makeRegSym char = Regex.Sym $ FSM.Sym char
 
 splitAtUnion :: String -> Maybe (String, String)
 splitAtUnion "" = Just ("", "")

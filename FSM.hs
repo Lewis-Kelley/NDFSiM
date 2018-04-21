@@ -6,8 +6,8 @@ import Data.Text (Text)
 import Data.Set
 
 type State = Text
-data Symbol = Sym Text | Epsilon
-  deriving (Eq, Ord)
+data Symbol = Sym Char | Epsilon
+  deriving (Eq, Ord, Show)
 
 type Alphabet = S.Set Symbol
 type TransitionMap = M.Map (State, Symbol) (Set State)
